@@ -19,13 +19,10 @@ x_goal = (x1+x2)/2;
 %% MPC Problem Set up
 % Constraints
 
-d_safe = 0.3;       % distance to avoid collision
+d_safe = 0.3; % distance to avoid collision
 vbar = 2; vlim = 5; % Limits
-alim = 1;           % acc limit
-betalim = 0.7;      % wheel angle limit
-
-% Terminal constraint
-eps = 1;            % termianl safe distance
+alim = 1;
+betalim = 0.7; % wheel
 
 % Objective Function
 % stage cost : (x-xgoal)'*Q*(X-xgoal)+u'*R*u+phi'*P*phi
@@ -41,10 +38,10 @@ zsim(:,1) = z0;
 usim = zeros(nu, M);
 feas = false([1,M]);
 
-% MPC solve with measurement of target vehicle's state
+% MPC solve
 for t = 1:M
     fprintf('Solving simstep: %i\n',t)
-    [feas(t), xOpt, uOpt, Jopt] = solve_cftoc(P, PN, Q, R, N, z0, xL, xU, uL, uU, bf, Af);
+    [feas(t), xOpt, uOpt, Jopt] = solve_cftoc(A, B, P, Q, R, N, x0, xL, xU, uL, uU, bf, Af);
     if ~feas(t)
         warning('Infeasible');
         return;
@@ -52,6 +49,16 @@ for t = 1:M
     usim(:,t) = uOpt(1);
     zsim(:,t+1) = znext(zsim(:,t),usim(:,t));
 end
+
+cost = 0; 
+constraints = [z(1,N+1) <= x2, z(1,N+1)>=1];
+for k = 1:N
+    cost = cost + (z(1,k)-x_goal)^2 + z (3,k)*Q*z(3,k) + u(:,k).'*R.u(:,k); 
+    % state
+    constraints = constraints + [x1<= z(1,k), z(1,k)<=x3, abs(z(3,k)-vbar)<=vlim]; 
+    
+end 
+cost = cost + z(1,N+1)*PN*z(1,N+1);
 
 
 % only for test to pull github

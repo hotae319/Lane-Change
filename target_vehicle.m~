@@ -1,0 +1,9 @@
+function [xtar, ytar, vtar] = target_vehicle(xtar_pre, ytar_pre, vtar_pre, vego)
+%% Target Car Reaction Model
+
+% 1 - constant velocity
+vtar = 1;
+ytar
+
+
+end

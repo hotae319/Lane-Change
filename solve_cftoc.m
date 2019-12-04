@@ -1,4 +1,4 @@
-function [feas, xOpt, uOpt, Jopt] = solve_cftoc(A, B, P, Q, R, N, x0, xL, xU, uL, uU, bf, Af)
+function [feas, xOpt, uOpt, Jopt] = solve_cftoc(P, PN, Q, R, N, x0, xL, xU, uL, uU, bf, Af)
 
 yalmip('clear')
 nx = size(A,2);
@@ -15,6 +15,17 @@ if isempty(Af)
 else
     constr = [constr Af*x(:,N+1)<=bf];
 end
+
+
+cost = 0; 
+constraints = [z(1,N+1) <= x2, z(1,N+1)>=1];
+for k = 1:N
+    cost = cost + (z(1,k)-x_goal)^2 + z (3,k)*Q*z(3,k) + u(:,k).'*R.u(:,k); 
+    % state
+    constraints = constraints + [x1<= z(1,k), z(1,k)<=x3, abs(z(3,k)-vbar)<=vlim]; 
+    
+end 
+cost = cost + z(1,N+1)*PN*z(1,N+1);
 
 cost = x(:,N+1)'*P*x(:,N+1);
 
@@ -39,3 +50,4 @@ end
 Jopt = cost;
 xOpt = double(x);
 uOpt = double(u);
+end
