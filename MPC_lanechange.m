@@ -1,59 +1,64 @@
-function [feas, zOpt, uOpt, zpred] = MPC_lanechange(P, x0, M, N)
-%% Kinematic Bicycle Model & Lane Setting
-% Parameter setting
-lr = 1; lf = 1;
-dt = 0.2; % sampling time
-
-
-% State and Input
-% z = (x, y, v, phi), u = [acc, beta]
-nz = 4; nu = 2; 
-z0 = [1,0,1,0];
-fdyn = @(z,u) [z(3)*cos(z(4)+u(2)); z(3)*sin(z(4)+u(2)); u(1); z(3)/lr*sin(u(2))];
-znext = @(z,u) z + fdyn(z,u)*dt; %Discrete time
+function [feas, zego, uego, ztar] = MPC_lanechange(M, N)
+%% Lane Setting
 
 % Lane width 
-x1 = -2; x2 = 0; x3 = 2;
+x1 = -3; x2 = 0; x3 = 3;
 x_goal = (x1+x2)/2;
 
+z0 = [(x2+x3)/2;0;10;0];
+
 %% MPC Problem Set up
+nz = 4; nu = 2;
 % Constraints
 
 d_safe = 0.3;       % distance to avoid collision
-vbar = 2; vlim = 5; % Limits
-alim = 1;           % acc limit
-betalim = 0.7;      % wheel angle limit
+vbar = 0; vlim = 50; % Limits
+alim = 10;           % acc limit
+betalim = 2;      % wheel angle limit
+
+zL = [x1;-inf;vbar-vlim;-pi/2];
+zU = [x3;inf;vbar+vlim;pi/2];
+uL = [-alim;-betalim];
+uU = [alim;betalim];
 
 % Terminal constraint
 eps = 1;            % termianl safe distance
+Af = [1 0 0 0;-1 0 0 0];
+bf = [x2;-x1];
 
 % Objective Function
 % stage cost : (x-xgoal)'*Q*(X-xgoal)+u'*R*u+phi'*P*phi
 % terminal cost : xN'*PN*xN 
 R = eye(nu); Q = 1; P = 1; PN = 1;
 
-% MPC Horizon
-N = 4;
 % MPC Solve setup
-M = 25;
-zsim = zeros(nz, M+1);
-zsim(:,1) = z0;
-usim = zeros(nu, M);
+
+zgoal = x_goal;
+safe_param = [d_safe;eps];
+
+% ego vehicle state history
+zego = zeros(nz, M+1); 
+zego(:,1) = z0;
+uego = zeros(nu, M);
 feas = false([1,M]);
+
+% Target vehicle history
+ztar = zeros(nz, M+1);
+ztar(:,1) = [x_goal;0;5;0];
 
 % MPC solve with measurement of target vehicle's state
 for t = 1:M
     fprintf('Solving simstep: %i\n',t)
-    [feas(t), xOpt, uOpt, Jopt] = solve_cftoc(P, PN, Q, R, N, z0, xL, xU, uL, uU, bf, Af);
+    [feas(t), zOpt, uOpt] = solve_cftoc(P, PN, Q, R, N, zego(:,t), zL, zU, uL, uU, bf, Af, safe_param, zgoal, ztar(:,t));
     if ~feas(t)
-        warning('Infeasible');
+        disp('Infeasible');
         return;
     end      
-    usim(:,t) = uOpt(1);
-    zsim(:,t+1) = znext(zsim(:,t),usim(:,t));
+    uego(:,t) = uOpt(1);
+    zego(:,t+1) = ego_vehicle(zego(:,t),uego(:,t));
+    % Target vehicle update
+    ztar(:,t+1) = target_vehicle(ztar(:,t), zego(3,t));
 end
 
-
-% only for test to pull github
 
 end
