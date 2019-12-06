@@ -1,4 +1,4 @@
-function [feas, zego, uego, ztar] = MPC_lanechange(M, N)
+function [feas, zego, uego, ztar, zpred] = MPC_lanechange(M, N)
 %% Lane Setting
 
 % Lane width 
@@ -22,9 +22,10 @@ uL = [-alim;-betalim];
 uU = [alim;betalim];
 
 % Terminal constraint
-eps = 1;            % termianl safe distance
-Af = [1 0 0 0;-1 0 0 0];
-bf = [x2;-x1];
+eps = 0.5;            % termianl safe distance
+phiN = 0.1;
+Af = [1 0 0 0;-1 0 0 0;0 0 0 1;0 0 0 -1];
+bf = [x2;-x1;phiN;-phiN];
 
 % Objective Function
 % stage cost : (x-xgoal)'*Q*(X-xgoal)+u'*R*u+phi'*P*phi
@@ -40,6 +41,7 @@ safe_param = [d_safe;eps];
 zego = zeros(nz, M+1); 
 zego(:,1) = z0;
 uego = zeros(nu, M);
+zpred = zeros(nz);
 feas = false([1,M]);
 
 % Target vehicle history
@@ -54,7 +56,8 @@ for t = 1:M
         disp('Infeasible');
         return;
     end      
-    uego(:,t) = uOpt(1);
+    zpred = zOpt;
+    uego(:,t) = uOpt(:,1);
     zego(:,t+1) = ego_vehicle(zego(:,t),uego(:,t));
     % Target vehicle update
     ztar(:,t+1) = target_vehicle(ztar(:,t), zego(3,t));
