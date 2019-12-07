@@ -1,7 +1,7 @@
 function ztar = target_vehicle(ztar_pre, vego)
 %% Target Car Reaction Model
 
-dt = 0.5; % target vehicle update timestep
+dt = 0.1; % target vehicle update timestep
 
 % 1 - constant velocity
 ztar(3) = ztar_pre(3);

@@ -1,4 +1,4 @@
-function [feas, zego, uego, ztar, zpred] = MPC_lanechange(M, N)
+function [feas, zego, uego, ztar, zpred, upred] = MPC_lanechange(M, N)
 %% Lane Setting
 
 % Lane width 
@@ -14,16 +14,16 @@ nz = 4; nu = 2;
 d_safe = 0.3;       % distance to avoid collision
 vbar = 0; vlim = 50; % Limits
 alim = 10;           % acc limit
-betalim = 2;      % wheel angle limit
+betalim = 1;      % steering angle limit
 
-zL = [x1;-inf;vbar-vlim;-pi/2];
-zU = [x3;inf;vbar+vlim;pi/2];
+zL = [x1;-inf;vbar-vlim;-0.7];
+zU = [x3;inf;vbar+vlim;0.7];
 uL = [-alim;-betalim];
 uU = [alim;betalim];
 
 % Terminal constraint
-eps = 0.5;            % termianl safe distance
-phiN = 0.1;
+eps = 0.3;            % termianl safe distance
+phiN = 1;
 Af = [1 0 0 0;-1 0 0 0;0 0 0 1;0 0 0 -1];
 bf = [x2;-x1;phiN;-phiN];
 
@@ -57,6 +57,7 @@ for t = 1:M
         return;
     end      
     zpred = zOpt;
+    upred = uOpt;
     uego(:,t) = uOpt(:,1);
     zego(:,t+1) = ego_vehicle(zego(:,t),uego(:,t));
     % Target vehicle update

@@ -7,9 +7,9 @@ x_init = (x2+x3)/2;
 % MPC Horizon
 N = 7;
 % MPC Solve setup
-M = 30;
+M = 40;
 
-[feas, zego, uego, ztar, zpred] = MPC_lanechange(M, N);
+[feas, zego, uego, ztar, zpred, upred] = MPC_lanechange(M, N);
 
 % Simulate MPC solution
 figure()
@@ -40,7 +40,7 @@ for t = 1:M+1
     set(tar, 'Xdata', tar_x(xtar), 'Ydata', tar_y(ytar));
     axis([-3 3 0 5])
     axis 'auto y'
-    pause(0.5)
+    pause(0.2)
     legend('ego', 'target')
     drawnow 
 end

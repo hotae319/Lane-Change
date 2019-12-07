@@ -2,7 +2,7 @@ function znext = ego_vehicle(z, u)
 %% Kinematic Bicycle Model 
 
 lr = 1; lf = 1;
-dt = 0.5; % sampling time
+dt = 0.1; % sampling time
 
 % State and Input
 % z = (x, y, v, phi), u = [acc, beta]
