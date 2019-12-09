@@ -38,7 +38,7 @@ for k = 1:N
     ztar_pred(1,k+1) = ztar_pred(1,k);
     ztar_pred(3:4,k+1) = ztar_pred(3:4,k);
 end
-constr = constr + [ztar_pred(2,end)<=z(2,end)-safe_param(2)]; 
+% constr = constr + [ztar_pred(2,end)<=z(2,end)-safe_param(2)]; 
 
 options = sdpsettings('verbose',0,'solver','fmincon');
 sol = optimize(constr,cost,options);

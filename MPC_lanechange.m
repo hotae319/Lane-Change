@@ -14,10 +14,10 @@ nz = 4; nu = 2;
 d_safe = 0.3;       % distance to avoid collision
 vbar = 0; vlim = 50; % Limits
 alim = 10;           % acc limit
-betalim = 1;      % steering angle limit
+betalim = 0.5;      % steering angle limit
 
-zL = [x1;-inf;vbar-vlim;-0.7];
-zU = [x3;inf;vbar+vlim;0.7];
+zL = [x1;-inf;vbar-vlim;-0.5];
+zU = [x3;inf;vbar+vlim;0.5];
 uL = [-alim;-betalim];
 uU = [alim;betalim];
 
@@ -25,7 +25,7 @@ uU = [alim;betalim];
 eps = 0.3;            % termianl safe distance
 phiN = 1;
 Af = [1 0 0 0;-1 0 0 0;0 0 0 1;0 0 0 -1];
-bf = [x2;-x1;phiN;-phiN];
+bf = [x3;-x1;phiN;phiN];
 
 % Objective Function
 % stage cost : (x-xgoal)'*Q*(X-xgoal)+u'*R*u+phi'*P*phi
@@ -46,7 +46,7 @@ feas = false([1,M]);
 
 % Target vehicle history
 ztar = zeros(nz, M+1);
-ztar(:,1) = [x_goal;0;5;0];
+ztar(:,1) = [x_goal;0;12;0];
 
 % MPC solve with measurement of target vehicle's state
 for t = 1:M

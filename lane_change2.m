@@ -22,6 +22,7 @@ legend('ego', 'target')
 title('ego vehicle trajectory')
 xlim([-3 3])
 
+
 car_size = 0.2;
 ego_x = @(xego) [xego-car_size, xego-car_size, xego+car_size, xego+car_size];
 ego_y = @(yego) [yego, yego + car_size, yego+car_size, yego];
@@ -40,6 +41,7 @@ for t = 1:M+1
     set(tar, 'Xdata', tar_x(xtar), 'Ydata', tar_y(ytar));
     axis([-3 3 0 5])
     axis 'auto y'
+    axis square
     pause(0.2)
     legend('ego', 'target')
     drawnow 
