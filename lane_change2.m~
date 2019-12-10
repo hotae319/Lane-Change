@@ -1,11 +1,11 @@
 %% Scenario 1
-nz = 4; nu = 2;
+
 % Lane width 
 x1 = -3; x2 = 0; x3 = 3;
 x_goal = (x1+x2)/2;
 x_init = (x2+x3)/2;
 % MPC Horizon
-N = 10;
+N = 7;
 % MPC Solve setup
 M = 40;
 
@@ -50,7 +50,7 @@ for t = 1:M+1
 %     axis square   
     axis image
     pause(0.1)
-    legend([ego, tar, tar2], 'ego', 'target', 'target2') % target2
+    legend([ego, tar], 'ego', 'target')
     drawnow 
 end
 

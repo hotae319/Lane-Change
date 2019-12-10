@@ -7,7 +7,7 @@ dt = 0.1;
 
 z = sdpvar(nz,N+1);
 u = sdpvar(nu,N);
-ztar_pred = zeros(nz,N+1);
+ztar_pred = zeros(2*nz,N+1); %target 2 
 ztar_pred(:,1) = ztar; % match initial state with measurement state 
 feas = false;
 
@@ -25,7 +25,7 @@ cost = (z(1,N+1)-zgoal)*PN*(z(1,N+1)-zgoal);
 
 for k = 1:N
     % cost at each time step
-    cost = cost + (z(1,k)-zgoal)*Q*(z(1,k)-zgoal) + z(4,k)*P*z(4,k) + u(:,k).'*R*u(:,k); 
+    cost = cost + (z(1,k)-zgoal)*Q*(z(1,k)-zgoal) + 0.01*(z(2,k)-ztar_pred(2,k))^2 + z(4,k)*P*z(4,k) + u(:,k).'*R*u(:,k); 
     % constraint at each time step
     constr = constr + [uL <= u(:,k), u(:,k) <= uU, zL <= z(:,k), z(:,k)<=zU];
     % state equation (transition)
@@ -37,6 +37,13 @@ for k = 1:N
     ztar_pred(2,k+1) = ztar_pred(2,k) + ztar(3)*dt; 
     ztar_pred(1,k+1) = ztar_pred(1,k);
     ztar_pred(3:4,k+1) = ztar_pred(3:4,k);
+    
+    % target 2
+    gap2 = z(1:2,k)-ztar_pred(1+nz:2+nz,k);
+    constr = constr + [gap2(1,1)^2+gap2(2,1)^2>= safe_param(1)];
+    ztar_pred(2+nz,k+1) = ztar_pred(2+nz,k) + ztar(3+nz)*dt; 
+    ztar_pred(1+nz,k+1) = ztar_pred(1+nz,k);
+    ztar_pred(3+nz:4+nz,k+1) = ztar_pred(3+nz:4+nz,k);
 end
 % constr = constr + [ztar_pred(2,end)<=z(2,end)-safe_param(2)]; 
 
