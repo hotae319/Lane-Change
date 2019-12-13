@@ -27,6 +27,7 @@ for k = 1:N
     % potential function
     gap = z(1:2,k)-ztar_pred(1:2,k);
     gap2 = z(1:2,k)-ztar_pred(1+nz:2+nz,k);
+    
     %potential = gap(1,1)^2+gap(2,1)^2 + gap2(1,1)^2+gap2(2,1)^2;
     % cost at each time step
     cost = cost + (z(1,k)-zgoal)*Q*(z(1,k)-zgoal)  + z(4,k)*P*z(4,k) + u(:,k).'*R*u(:,k); 
@@ -51,7 +52,7 @@ end
 options = sdpsettings('verbose',0,'solver','fmincon');
 
 sol = optimize(constr,cost,options);
-
+%sol = optimize(constr);
 if sol.problem == 0
     feas = true;
 elseif sol.problem == 3

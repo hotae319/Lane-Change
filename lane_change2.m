@@ -24,7 +24,7 @@ legend('ego', 'target', 'target2')
 title('ego vehicle trajectory')
 xlim([-3 3])
 
-
+figure('Position', [100, 100, 1500, 800])
 car_size_h = 2;
 car_size_w = 1;
 ego_x = @(xego) [xego-car_size_w, xego-car_size_w, xego+car_size_w, xego+car_size_w];
@@ -50,7 +50,7 @@ for t = 1:M+1
 %     axis square   
     axis image
     pause(0.1)
-    legend([ego, tar, tar2], 'ego', 'target', 'target2') % target2
+    legend([ego, tar, tar2], 'ego', 'target', 'target2', 'Location', 'Best') % target2
     drawnow 
 end
 
