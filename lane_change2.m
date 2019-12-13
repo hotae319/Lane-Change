@@ -9,7 +9,7 @@ N = 10;
 % MPC Solve setup
 M = 40;
 
-[feas, zego, uego, ztar, zpred, upred] = MPC_lanechange(M, N);
+[feas, zego, uego, ztar, zpred, upred, ztar_pred] = MPC_lanechange(M, N);
 
 % Simulate MPC solution
 figure()

@@ -1,4 +1,4 @@
-function [feas, zego, uego, ztar, zpred, upred] = MPC_lanechange(M, N)
+function [feas, zego, uego, ztar, zpred, upred, ztar_pred] = MPC_lanechange(M, N)
 %% Lane Setting
 
 % Lane width 
@@ -11,26 +11,26 @@ z0 = [(x2+x3)/2;0;10;0];
 nz = 4; nu = 2;
 % Constraints
 
-d_safe = 0.3;       % distance to avoid collision
+d_safe = 0.6;       % distance to avoid collision
 vbar = 0; vlim = 50; % Limits
 alim = 10;           % acc limit
-betalim = 0.5;      % steering angle limit
+betalim = 1;      % steering angle limit
 
-zL = [x1;-inf;vbar-vlim;-0.5];
-zU = [x3;inf;vbar+vlim;0.5];
+zL = [x1;-inf;vbar-vlim;-0.3];
+zU = [x3;inf;vbar+vlim;0.3];
 uL = [-alim;-betalim];
 uU = [alim;betalim];
 
 % Terminal constraint
 eps = 0.3;            % termianl safe distance
-phiN = 1;
+phiN = 0.2;
 Af = [1 0 0 0;-1 0 0 0;0 0 0 1;0 0 0 -1];
-bf = [x3;-x1;phiN;phiN];
+bf = [x2-0.5;-x1+0.5;phiN;phiN];
 
 % Objective Function
 % stage cost : (x-xgoal)'*Q*(X-xgoal)+u'*R*u+phi'*P*phi
 % terminal cost : xN'*PN*xN 
-R = 0.1*eye(nu); Q = 1; P = 1; PN = 1;
+R = 0.1*eye(nu); Q = 1; P = 1; PN = 6;
 
 % MPC Solve setup
 
@@ -53,7 +53,7 @@ ztar(nz+1:end,1) = [x_goal;12;10;0];
 % MPC solve with measurement of target vehicle's state
 for t = 1:M
     fprintf('Solving simstep: %i\n',t)
-    [feas(t), zOpt, uOpt] = solve_cftoc(P, PN, Q, R, N, zego(:,t), zL, zU, uL, uU, bf, Af, safe_param, zgoal, ztar(:,t));
+    [feas(t), zOpt, uOpt, ztar_pred] = solve_cftoc(P, PN, Q, R, N, zego(:,t), zL, zU, uL, uU, bf, Af, safe_param, zgoal, ztar(:,t));
     if ~feas(t)
         disp('Infeasible');
         return;
