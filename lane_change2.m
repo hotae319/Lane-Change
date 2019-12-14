@@ -7,7 +7,7 @@ x_init = (x2+x3)/2;
 % MPC Horizon
 N = 10;
 % MPC Solve setup
-M = 40;
+M = 30;
 
 [feas, zego, uego, ztar, zpred, upred, ztar_pred] = MPC_lanechange(M, N);
 
@@ -17,7 +17,7 @@ plot(zego(1,:),zego(2,:),'o');
 hold on
 plot(ztar(1,:), ztar(2,:), 'xb');
 hold on
-plot(ztar(1+nz,:), ztar(2+nz,:), 'xb'); % target2
+plot(ztar(1+nz,:), ztar(2+nz,:), 'xg'); % target2
 hold on
 
 legend('ego', 'target', 'target2')

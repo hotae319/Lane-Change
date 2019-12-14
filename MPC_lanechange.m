@@ -5,13 +5,14 @@ function [feas, zego, uego, ztar, zpred, upred, ztar_pred] = MPC_lanechange(M, N
 x1 = -3; x2 = 0; x3 = 3;
 x_goal = (x1+x2)/2;
 
-z0 = [(x2+x3)/2;0;10;0];
+%z0 = [(x2+x3)/2;0;10;0];
+z0 = [x_goal;3;10;0];
 
 %% MPC Problem Set up
 nz = 4; nu = 2;
 % Constraints
 
-d_safe = 5;       % distance to avoid collision
+d_safe = 4;       % distance to avoid collision
 vbar = 0; vlim = 50; % Limits
 alim = 10;           % acc limit
 betalim = 1;      % steering angle limit
@@ -30,8 +31,9 @@ bf = [x2-0.5;-x1+0.5;phiN;phiN];
 % Objective Function
 % stage cost : (x-xgoal)'*Q*(X-xgoal)+u'*R*u+phi'*P*phi
 % terminal cost : xN'*PN*xN 
-R = 0.1*eye(nu); Q = 1; P = 1; PN = 6;
-
+%R = 0.1*eye(nu); 
+Q = 1; P = 1; PN = 6;
+R = [0.1 0;0 3];
 % MPC Solve setup
 
 zgoal = x_goal;
@@ -47,8 +49,8 @@ feas = false([1,M]);
 % Target vehicle history
 % ztar = zeros(nz, M+1);
 ztar = zeros(nz*2, M+1); % target 2
-ztar(1:nz,1) = [x_goal;0;9;0];
-ztar(nz+1:end,1) = [x_goal;12;10;0];
+ztar(1:nz,1) = [x_goal;0;10;0];
+ztar(nz+1:end,1) = [x_goal;10;10;0];
 
 % MPC solve with measurement of target vehicle's state
 for t = 1:M
