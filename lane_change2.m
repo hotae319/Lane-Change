@@ -5,7 +5,7 @@ x1 = -3; x2 = 0; x3 = 3;
 x_goal = (x1+x2)/2;
 x_init = (x2+x3)/2;
 % MPC Horizon
-N = 10;
+N = 7;
 % MPC Solve setup
 M = 30;
 
@@ -26,7 +26,7 @@ xlim([-3 3])
 
 figure('Position', [100, 100, 1500, 800])
 car_size_h = 2;
-car_size_w = 1;
+car_size_w = 0.6;
 ego_x = @(xego) [xego-car_size_w, xego-car_size_w, xego+car_size_w, xego+car_size_w];
 ego_y = @(yego) [yego, yego + car_size_h, yego+car_size_h, yego];
 tar_x = @(xtar) [xtar-car_size_w, xtar-car_size_w, xtar+car_size_w, xtar+car_size_w];
