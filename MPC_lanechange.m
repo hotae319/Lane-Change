@@ -49,7 +49,7 @@ feas = false([1,M]);
 % Target vehicle history
 % ztar = zeros(nz, M+1);
 ztar = zeros(nz*2, M+1); % target 2
-ztar(1:nz,1) = [x_goal;0;10.5;0];
+ztar(1:nz,1) = [x_goal;0;11;0];
 ztar(nz+1:end,1) = [x_goal;6;11;0];
 
 % MPC solve with measurement of target vehicle's state

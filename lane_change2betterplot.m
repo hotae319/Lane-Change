@@ -10,8 +10,9 @@ N = 7;
 M = 30;
 
 [feas, zego, uego, ztar, zpred, upred, ztar_pred] = MPC_lanechange(M, N);
-
-
+mov = VideoWriter('lane_change_video_follow.avi');
+mov.FrameRate = 8;
+open(mov);
 % Simulate MPC solution
 f1 = figure();
 plot(zego(1,:),zego(2,:),'ro');
@@ -29,9 +30,6 @@ legend('Ego', 'Target', 'Target2', 'Location','best')
 title('Ego Vehicle Trajectory')
 xlim([-3 3])
 
-mov = VideoWriter('lane_change.avi');
-mov.FrameRate = 8;
-open(mov)
 %f = figure('Position', [100, 100, 1500, 800]);
 f = figure();
 plot(zego(1,:),zego(2,:),'wo');
@@ -45,18 +43,19 @@ xline(0,':');
 xline(-3,':');
 xline(3,':');
 axis image
+
 car_size_h = 1;
-% car_size_w = 0.6;
-car_size = 0.5;
-ego_x = @(xego) [xego-car_size, xego-car_size, xego+car_size, xego+car_size];
+car_size_w = 0.5;
+%car_size = 0.4;
+ego_x = @(xego) [xego-car_size_w, xego-car_size_w, xego+car_size_w, xego+car_size_w];
 ego_y = @(yego) [yego-car_size_h, yego + car_size_h, yego+car_size_h, yego-car_size_h];
-tar_x = @(xtar) [xtar-car_size, xtar-car_size, xtar+car_size, xtar+car_size];
+tar_x = @(xtar) [xtar-car_size_w, xtar-car_size_w, xtar+car_size_w, xtar+car_size_w];
 tar_y = @(ytar) [ytar-car_size_h, ytar+car_size_h, ytar+car_size_h, ytar-car_size_h];
-%lane = fill([-3 -3 3 3], [0 60 60 0], 'w');
+
 hold on
 ego = fill(ego_x(x_init), ego_y(0), 'r');
 tar = fill(tar_x(x_goal), tar_y(0), 'b');
-tar2 = fill(tar_x(x_goal), tar_y(7), 'b'); % add target 2
+tar2 = fill(tar_x(x_goal), tar_y(7), 'g'); % add target 2
 % Annotation help
 steerVec = zego(4,:);
 speedVec = zego(3,:);
@@ -85,24 +84,34 @@ for t = 1:M+1
     p2 = [xego;yego;0] + rotz(steerVec(t)*(180/pi))*[x2;y2;0];
     p3 = [xego;yego;0] + rotz(steerVec(t)*(180/pi))*[x3;y3;0];
     p4 = [xego;yego;0] + rotz(steerVec(t)*(180/pi))*[x4;y4;0];
-    
     set(ego, 'Xdata', [p1(1),p2(1),p3(1),p4(1)], 'Ydata', [p1(2),p2(2),p3(2),p4(2)]);
-    set(tar, 'Xdata', tar_x(xtar), 'Ydata', tar_y(ytar));   
+    set(tar, 'Xdata', tar_x(xtar), 'Ydata', tar_y(ytar));
     set(tar2, 'Xdata', tar_x(xtar2), 'Ydata', tar_y(ytar2));
     axis image
     steerVal = num2str(steerVec(t));
     speedVal = num2str(speedVec(t));
-    k = annotation('textbox',dim,'Color','r','String',{Egoheader, strcat(EgoangleAnnotate, steerVal), strcat(EgospeedAnnotate,speedVal)},'FitBoxToText','on');
     pause(0.1)
-    legend([ego, tar, tar2], 'Ego', 'Target', 'Target2', 'Location', 'Best') % target2
-    %drawnow 
+    hold on
+   legend([ego, tar, tar2], 'Ego', 'Target', 'Target2', 'Location', 'Best') % target2
+    drawnow 
     F(t) = getframe(f);
     writeVideo(mov,F(t));
-    delete(k)
 end
-k = annotation('textbox',dim,'Color','r','String',{Egoheader, strcat(EgoangleAnnotate, steerVal), strcat(EgospeedAnnotate,speedVal)},'FitBoxToText','on');
-%k2 = annotation('textbox',dim2,'Color','b','String',{Targetheader, strcat(EgoangleAnnotate, targetSteerVal), strcat(EgospeedAnnotate,targetSpeedVal)},'FitBoxToText','on');
+figure(f)
 title('Ego Vehicle Trajectory')
-close(mov);
+hold on
+plot(zego(1,:),zego(2,:),'ro');
+hold on
+plot(ztar(1,:), ztar(2,:), 'bx');
+hold on
+plot(ztar(1+nz,:), ztar(2+nz,:), 'g*'); % target2
+hold on
+xline(0,':');
+xline(-3,':');
+xline(3,':');
+legend([ego, tar, tar2], 'Ego', 'Target', 'Target2', 'Location', 'Best')
+close(mov)
+
+
 %% movie
 fig = figure;movie(fig,F,1,5)
